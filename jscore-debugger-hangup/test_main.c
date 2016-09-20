@@ -19,11 +19,35 @@ static JSValueRef TestNativeFunc(JSContextRef ctx,
     return JSValueMakeNull(ctx);
 }
 
+JSObjectRef CreateFunctionFromClass(JSContextRef context) {
+    JSClassDefinition defn = kJSClassDefinitionEmpty;
+    JSStaticFunction static_functions[] = {
+        { "f", &TestNativeFunc, 0 },
+        { 0, 0, 0 }
+    };
+    defn.staticFunctions = static_functions;
+    JSClassRef klass = JSClassCreate(&defn);
+    JSObjectRef obj = JSObjectMake(context, klass, NULL);
+    JSValueProtect(context, obj);
+    JSStringRef f_str = JSStringCreateWithUTF8CString("f");
+    
+    JSObjectRef f = JSValueToObject(context, JSObjectGetProperty(context, obj, f_str, NULL), NULL);
+    JSValueProtect(context, f);
+    
+    JSStringRelease(f_str);
+    JSValueUnprotect(context, obj);
+    JSClassRelease(klass);
+    
+    return f;
+}
+
 void TestMain() {
     JSGlobalContextRef context = JSGlobalContextCreate(NULL);
     
     JSObjectRef func = JSObjectMakeFunctionWithCallback(context, NULL, &TestNativeFunc);
     JSValueProtect(context, func);
+
+//    JSObjectRef func = CreateFunctionFromClass(context);
     
     JSObjectCallAsFunction(context, func, NULL, 0, NULL, NULL);
 

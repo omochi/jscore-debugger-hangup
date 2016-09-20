@@ -1,3 +1,3 @@
 # jscore-debugger-hangup
 
-It was fixed in Xcode 10.
+It was fixed in Xcode 8.
